@@ -1,28 +1,16 @@
+/*  Parser de Xml para notas fiscais, parte Lex
+ *
+ *  Rodrigo Caus - 186807
+ *	Victor Santolim - 187888
+ */
 
 %{
-// Rodrigo Caus e Victor Santolim
-// Parser de Xml para notas fiscais, parte Lex
 
 #include <stdlib.h>
 #include <string.h>
 void yyerror(char *);
+double transfDouble(char *);
 #include "y.tab.h"
-
-double transfDouble(char * string)
-{
-	int i;
-	int len = strlen(string);
-	for( i=0 ; i< len ; i++)
-	{
-		if(string[i] == ',')
-		{
-			string[i] = '.';
-			break;
-		}
-	}
-	return atof(string);
-}
-
 
 %}
 
@@ -89,14 +77,31 @@ double transfDouble(char * string)
 (<\/valorTotalISS>) {return DEPVISS;}
 
 
-([ A-Za-z]+) {yylval.string = strdup(yytext); return STRING;}
+([ A-Za-z]+) {yylval.stringValue = strdup(yytext); return STRING;}
 
-([0-9]+\.[0-9]+) {yylval.double = atof(yytext); return DOUBLE;}
+([0-9]+\.[0-9]+) {yylval.doubleValue = atof(yytext); return DOUBLE;}
 
-([0-9]+\,[0-9]+) {yylval.double = transfDouble(yytext); return DOUBLE;}
+([0-9]+\,[0-9]+) {yylval.doubleValue = transfDouble(yytext); return DOUBLE;}
+
+. ;
 
 %%
 
 int yywrap() {
   return 1;
+}
+
+double transfDouble(char * string)
+{
+	int i;
+	int len = strlen(string);
+	for( i=0 ; i< len ; i++)
+	{
+		if(string[i] == ',')
+		{
+			string[i] = '.';
+			break;
+		}
+	}
+	return atof(string);
 }
