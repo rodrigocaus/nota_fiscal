@@ -12,30 +12,30 @@ análise sintática, feita em YACC (bison).
 
 Há várias maneiras de testar o programa.
 
-	Ele sendo executado da forma:
+Ele sendo executado da forma:
 
 	```
 		./main <arquivo_entrada.xml >arquivo_saida.csv
 	```
 
-	Com o script de teste:
+Com o script de teste:
 
 	```
 		sh test.sh main
 	```
 
-	ele irá rodar todos os arquivos de `xml_aula` e imprimir na saída padrão.
+ele irá rodar todos os arquivos de `xml_aula` e imprimir na saída padrão.
 
-	Com o Makefile, a saída é a mesma que no caso acima:
+Com o Makefile, a saída é a mesma que no caso acima:
 
 	```
 		make test
 	```
 
-	Para gerar um arquivo csv, basta executar o make com arquivo de saida:
+Para gerar um arquivo csv, basta executar o make com arquivo de saida:
 
 	```
 		make test >saida.csv
 	```
 
-	O programa já está com saída formatada para o padrão de csv.
+O programa já está com saída formatada para o padrão de csv.
