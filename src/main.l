@@ -1,8 +1,8 @@
-/*  Parser de Xml para notas fiscais, parte Lex
- *
- *  Rodrigo Caus - 186807
- *	Victor Santolim - 187888
- */
+ /*  Parser de Xml para notas fiscais, parte Lex
+  *
+  *  Rodrigo Caus - 186807
+  *	Victor Santolim - 187888
+  */
 
 %{
 
@@ -16,41 +16,74 @@ double transfDouble(char *);
 
 
 %%
+	/* Tokens de delimitacao */
 
-(<TOMADOR_CIDADE_CODIGO>) {return ANTTOMCID;}
-(<tsMunTmd>) {return ANTTOMCID;}
+	/* Tokens de tag precedente e procedente de nome de cidade especifica. Exemplo: Belem e Parauapebas  */
 
-(<\/TOMADOR_CIDADE_CODIGO>) {return DEPTOMCID;}
-(<\/tsMunTmd>) {return DEPTOMCID;}
+		/* Tomador */
 
-((<PRESTADOR_CIDADE_CODIGO>)|(<tsMunPtd>)) {return ANTPRESTCID;}
-((<\/PRESTADOR_CIDADE_CODIGO>)|(<\/tsMunPtd>)) {return DEPPRESTCID;}
+(<TOMADOR_CIDADE>) {return ANTCIDTOM;}
+(<tsMunTmd>) {return ANTCIDTOM;}
+(<\/TOMADOR_CIDADE>) {return DEPCIDTOM;}
+(<\/tsMunTmd>) {return DEPCIDTOM;}
+
+		/* Prestador */
+
+(<PRESTADOR_CIDADE>) {return ANTCIDPREST;}
+(<tsMunPtd>) {return ANTCIDPREST;}
+(<\/PRESTADOR_CIDADE>) {return DEPCIDPREST;}
+(<\/tsMunPtd>) {return DEPCIDPREST;}
+
+	/* Tokens de tag precedente e procedente da area de aninhamento de informaçoes do tomador. 
+ 	Exemplo: Nova Lima e Rio de Janeiro */
+
+		/* Inicio area tomador */
 
 (<Tomador>) {return AREATOM;}
 (<ns3\:Tomador>) {return AREATOM;}
 (<TomadorServico>) {return AREATOM;}
 (<tomador>) {return AREATOM;}
 
+		/* Fim area tomador */
+
 (<\/Tomador>) {return FIMAREATOM;}
 (<\/ns3\:Tomador>) {return FIMAREATOM;}
 (<\/TomadorServico>) {return FIMAREATOM;}
 (<\/tomador>) {return FIMAREATOM;}
 
+ 	/* Tokens de tag precedente e procedente da area de aninhamento de informaçoes do prestador. 
+ 	Exemplo: Nova Lima e Rio de Janeiro */
+
+		/* Inicio area prestador */
+
 (<PrestadorServico>) {return AREAPREST;}
 (<ns3\:PrestadorServico>) {return AREAPREST;}
 (<prestador>) {return AREAPREST;}
+
+		/* Fim area prestador */
 
 (<\/PrestadorServico>) {return FIMAREAPREST;}
 (<\/ns3\:PrestadorServico>) {return FIMAREAPREST;}
 (<\/prestador>) {return FIMAREAPREST;}
 
-(<CodigoMunicipio>) {return ANTCID;}
-(<ns3\:CodigoMunicipio>) {return ANTCID;}
-(<codigoMunipio>) {return ANTCID;}
+ 	/* Tokens de tag precedente e procedente de cep (neutro) 
+ 	Exemplo: Nova Lima e Rio de Janeiro */
 
-(<\/CodigoMunicipio>) {return DEPCID;}
-(<\/ns3\:CodigoMunicipio>) {return DEPCID;}
-(<\/codigoMunipio>) {return DEPCID;}
+		/* Precede CEP */
+
+(<Cep>) {return ANTCEP;}
+(<ns3\:Cep>) {return ANTCEP;}
+(<cep>) {return ANTCEP;}
+
+		/* Procede CEP */
+
+(<\/Cep>) {return DEPCEP;}
+(<\/ns3\:Cep>) {return DEPCEP;}
+(<\/cep>) {return DEPCEP;}
+
+ 	/* Tokens de tag precedente e procedente de valor de servicos (Todos os padroes de XML) */
+
+		/* Precede valor de servico */
 
 (<VALOR_SERVICO>) {return ANTVSERV;}
 (<tsVlrSvc>) {return ANTVSERV;}
@@ -58,11 +91,17 @@ double transfDouble(char *);
 (<BaseCalculo>) {return ANTVSERV;}
 (<valorTotalServico>) {return ANTVSERV;}
 
+		/* Procede valor de servico */
+
 (<\/VALOR_SERVICO>) {return DEPVSERV;}
 (<\/tsVlrSvc>) {return DEPVSERV;}
 (<\/ns3\:BaseCalculo>) {return DEPVSERV;}
 (<\/BaseCalculo>) {return DEPVSERV;}
 (<\/valorTotalServico>) {return DEPVSERV;}
+
+ 	/* Tokens de tag precedente e procedente de valor de ISS (Todos os padroes de XML) */
+
+		/* Precede valor de ISS */
 
 (<VALOR_ISS>) {return ANTVISS;}
 (<tsVlrISSRet>) {return ANTVISS;}
@@ -70,16 +109,25 @@ double transfDouble(char *);
 (<ValorIss>) {return ANTVISS;}
 (<valorTotalISS>) {return ANTVISS;}
 
+		/* Procede valor de ISS */
+
 (<\/VALOR_ISS>) {return DEPVISS;}
 (<\/tsVlrISSRet>) {return DEPVISS;}
 (<\/ns3\:ValorIss>) {return DEPVISS;}
 (<\/ValorIss>) {return DEPVISS;}
 (<\/valorTotalISS>) {return DEPVISS;}
 
+	/* Tokens de dados */
+
+	/* Nomes de cidades (strings sem numeros) */
 
 ([ A-Za-z]+) {yylval.stringValue = strdup(yytext); return STRING;}
 
+	/* Valores com separador decimal = '.' */
+
 ([0-9]+\.[0-9]+) {yylval.doubleValue = atof(yytext); return DOUBLE;}
+
+	/* Valores com separador decimal = ',' */
 
 ([0-9]+\,[0-9]+) {yylval.doubleValue = transfDouble(yytext); return DOUBLE;}
 
@@ -91,6 +139,8 @@ int yywrap() {
   return 1;
 }
 
+ /* Funcao que transforma uma string numerica com separador decimal virgula
+ 	em ponto, depois transforma em double e retorna */
 double transfDouble(char * string)
 {
 	int i;
