@@ -11,8 +11,7 @@
 #include "y.tab.h"
 
 void yyerror(char *);
-double transfDouble(char *);
-char *normCep(char * string);
+char * normString (char * string);
 
 %}
 
@@ -88,6 +87,7 @@ char *normCep(char * string);
 		/* Precede valor de servico */
 
 (<VALOR_SERVICO>) {return ANTVSERV;}
+(<ValorServicos>) {return ANTVSERV;}
 (<tsVlrSvc>) {return ANTVSERV;}
 (<ns3\:BaseCalculo>) {return ANTVSERV;}
 (<BaseCalculo>) {return ANTVSERV;}
@@ -96,6 +96,7 @@ char *normCep(char * string);
 		/* Procede valor de servico */
 
 (<\/VALOR_SERVICO>) {return DEPVSERV;}
+(<\/ValorServicos>) {return DEPVSERV;}
 (<\/tsVlrSvc>) {return DEPVSERV;}
 (<\/ns3\:BaseCalculo>) {return DEPVSERV;}
 (<\/BaseCalculo>) {return DEPVSERV;}
@@ -105,7 +106,7 @@ char *normCep(char * string);
 
 		/* Precede valor de ISS */
 
-(<VALOR_ISS>) {return ANTVISS;}
+(\<VALOR_ISS\>) {return ANTVISS;}
 (<tsVlrISSRet>) {return ANTVISS;}
 (<ns3\:ValorIss>) {return ANTVISS;}
 (<ValorIss>) {return ANTVISS;}
@@ -121,23 +122,9 @@ char *normCep(char * string);
 
 	/* Tokens de dados */
 
-	/* Valores com separador decimal = '.' */
+    /* Definicao de string para palavras e numeros com separador decimal */
 
-([0-9]+\.[0-9]+) {yylval.doubleValue = atof(yytext); return DOUBLE;}
-
-	/* Valores com separador decimal = ',' */
-
-([0-9]+\,[0-9]+) {yylval.doubleValue = transfDouble(yytext); return DOUBLE;}
-
-    /* Nomes de cidades (strings sem numeros) */
-
-([ A-Za-z]+) {yylval.stringValue = strdup(yytext); return STRING;}
-
-    /* Valores para deteccao de CEP (00000000 ou 00000-000) */
-
-([0-9]{8}) {yylval.stringValue = strdup(yytext); return STRING;}
-
-([0-9]{5}\-[0-9]{3}) {yylval.stringValue = strdup(normCep(yytext)); return STRING;}
+([ A-Za-z0-9\,\.\-]+) {yylval.stringValue = strdup(normString(yytext)); return STRING;}
 
 \n ;
 
@@ -149,36 +136,20 @@ int yywrap() {
   return 1;
 }
 
- /* Funcao que transforma uma string numerica com separador decimal virgula
- 	em ponto, depois transforma em double e retorna */
-double transfDouble(char * string)
+char * normString (char * string)
 {
-	int i;
-	int len = strlen(string);
-	for( i=0 ; i< len ; i++)
-	{
-		if(string[i] == ',')
-		{
-			string[i] = '.';
-			break;
-		}
-	}
-	return atof(string);
-}
-
-    /*  Funcao que transforma uma string de CEP com separador traco '-'
-        para um padrao apenas numerico */
-char * normCep(char * string)
-{
-    char aposTraco = 0;
     int len = strlen(string);
-    for (int i=0; i< len; i++)
-    {
-        if(string[i] == '-')
-            aposTraco = 1;
-        if(aposTraco == 1)
-            string[i] = string[i+1];
-    }
+    for(int i = 0; i < len; i++)
+        if(string[i] == ',') string[i] = '.';
 
+    unsigned char pointCouter = 0;
+    for(int i = len-1; i >= 0; i--) {
+
+        if(string[i] == '.' && pointCouter) {
+            for(int j = i; j < len; j++)
+                string[j] = string[j+1];
+        }
+        else if(string[i] == '.') pointCouter++;
+    }
     return string;
 }

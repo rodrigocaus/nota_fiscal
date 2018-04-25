@@ -14,14 +14,12 @@
 void yyerror(char *c);
 int yylex(void);
 
-double valorIss = -1.0;
-double valorServico = -1.0;
+char valorIss[20];
+char valorServico[20];
 char municipioTomador[100];
 char municipioPrestador[100];
 
 %}
-
-%define parse.error verbose
 
 %token ANTCIDTOM DEPCIDTOM ANTCIDPREST DEPCIDPREST
 %token AREATOM FIMAREATOM AREAPREST FIMAREAPREST
@@ -46,11 +44,13 @@ PROGRAMA:
     ;
 
 INFORMACAO:
-    ANTVISS DOUBLE DEPVISS {
-        valorIss = $<doubleValue>2;
+    ANTVISS STRING DEPVISS {
+        strcpy(valorIss, $<stringValue>2);
+        free($<stringValue>2);
     }
-    | ANTVSERV DOUBLE DEPVSERV {
-        valorServico = $<doubleValue>2;
+    | ANTVSERV STRING DEPVSERV {
+        strcpy(valorServico, $<stringValue>2);
+        free($<stringValue>2);
     }
     | ANTCIDTOM STRING DEPCIDTOM {
         strcpy(municipioTomador, $<stringValue>2);
@@ -77,7 +77,6 @@ DADO:
     STRING {
         free($<stringValue>1);
     }
-    | DOUBLE
     | DADO DADO
     |
     ;
@@ -85,18 +84,20 @@ DADO:
 %%
 
 void yyerror(char *s) {
-    printf("%s\n", s);
+    return;
 }
 
 int main() {
 
     // Inicializa as strings como vazias
+    strcpy(valorIss, "-");
+    strcpy(valorServico, "-");
     strcpy(municipioTomador, "-");
     strcpy(municipioPrestador, "-");
 
     yyparse();
 
-    printf("%s,%s,%.2lf,%.2lf\n", municipioTomador, municipioPrestador
+    printf("%s,%s,%s,%s\n", municipioTomador, municipioPrestador
                             , valorServico, valorIss);
 
     return 0;
