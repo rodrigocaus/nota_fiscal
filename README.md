@@ -39,3 +39,8 @@ make test >saida.csv
 ```
 
 O programa já está com saída formatada para o padrão de csv.
+
+## Saida do programa
+
+A saída é do padrão de csv separado por vírgulas, cujas
+informações são da forma `cidade_tomador,cidade_prestador,valor_servico,valor_iss\n`

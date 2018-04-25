@@ -8,9 +8,11 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "y.tab.h"
+
 void yyerror(char *);
 double transfDouble(char *);
-#include "y.tab.h"
+char *normCep(char * string);
 
 %}
 
@@ -34,7 +36,7 @@ double transfDouble(char *);
 (<\/PRESTADOR_CIDADE>) {return DEPCIDPREST;}
 (<\/tsMunPtd>) {return DEPCIDPREST;}
 
-	/* Tokens de tag precedente e procedente da area de aninhamento de informaçoes do tomador. 
+	/* Tokens de tag precedente e procedente da area de aninhamento de informaçoes do tomador.
  	Exemplo: Nova Lima e Rio de Janeiro */
 
 		/* Inicio area tomador */
@@ -51,7 +53,7 @@ double transfDouble(char *);
 (<\/TomadorServico>) {return FIMAREATOM;}
 (<\/tomador>) {return FIMAREATOM;}
 
- 	/* Tokens de tag precedente e procedente da area de aninhamento de informaçoes do prestador. 
+ 	/* Tokens de tag precedente e procedente da area de aninhamento de informaçoes do prestador.
  	Exemplo: Nova Lima e Rio de Janeiro */
 
 		/* Inicio area prestador */
@@ -66,7 +68,7 @@ double transfDouble(char *);
 (<\/ns3\:PrestadorServico>) {return FIMAREAPREST;}
 (<\/prestador>) {return FIMAREAPREST;}
 
- 	/* Tokens de tag precedente e procedente de cep (neutro) 
+ 	/* Tokens de tag precedente e procedente de cep (neutro)
  	Exemplo: Nova Lima e Rio de Janeiro */
 
 		/* Precede CEP */
@@ -119,10 +121,6 @@ double transfDouble(char *);
 
 	/* Tokens de dados */
 
-	/* Nomes de cidades (strings sem numeros) */
-
-([ A-Za-z]+) {yylval.stringValue = strdup(yytext); return STRING;}
-
 	/* Valores com separador decimal = '.' */
 
 ([0-9]+\.[0-9]+) {yylval.doubleValue = atof(yytext); return DOUBLE;}
@@ -130,6 +128,18 @@ double transfDouble(char *);
 	/* Valores com separador decimal = ',' */
 
 ([0-9]+\,[0-9]+) {yylval.doubleValue = transfDouble(yytext); return DOUBLE;}
+
+    /* Nomes de cidades (strings sem numeros) */
+
+([ A-Za-z]+) {yylval.stringValue = strdup(yytext); return STRING;}
+
+    /* Valores para deteccao de CEP (00000000 ou 00000-000) */
+
+([0-9]{8}) {yylval.stringValue = strdup(yytext); return STRING;}
+
+([0-9]{5}\-[0-9]{3}) {yylval.stringValue = strdup(normCep(yytext)); return STRING;}
+
+\n ;
 
 . ;
 
@@ -154,4 +164,21 @@ double transfDouble(char * string)
 		}
 	}
 	return atof(string);
+}
+
+    /*  Funcao que transforma uma string de CEP com separador traco '-'
+        para um padrao apenas numerico */
+char * normCep(char * string)
+{
+    char aposTraco = 0;
+    int len = strlen(string);
+    for (int i=0; i< len; i++)
+    {
+        if(string[i] == '-')
+            aposTraco = 1;
+        if(aposTraco == 1)
+            string[i] = string[i+1];
+    }
+
+    return string;
 }
