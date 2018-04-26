@@ -11,6 +11,8 @@
 #include "y.tab.h"
 
 void yyerror(char *);
+ /* Normaliza uma string, trocando vírgula por pontos
+    e removendo separador milhar de números */
 char * normString (char * string);
 
 %}
@@ -106,7 +108,7 @@ char * normString (char * string);
 
 		/* Precede valor de ISS */
 
-(\<VALOR_ISS\>) {return ANTVISS;}
+(<VALOR_ISS>) {return ANTVISS;}
 (<tsVlrISSRet>) {return ANTVISS;}
 (<ns3\:ValorIss>) {return ANTVISS;}
 (<ValorIss>) {return ANTVISS;}

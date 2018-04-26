@@ -24,12 +24,12 @@ char municipioPrestador[100];
 %token ANTCIDTOM DEPCIDTOM ANTCIDPREST DEPCIDPREST
 %token AREATOM FIMAREATOM AREAPREST FIMAREAPREST
 %token ANTCEP DEPCEP ANTVSERV DEPVSERV ANTVISS DEPVISS
-%token STRING DOUBLE
+%token STRING
 
 %left ANTCIDTOM DEPCIDTOM ANTCIDPREST DEPCIDPREST
 %left AREATOM FIMAREATOM AREAPREST FIMAREAPREST
 %left ANTCEP DEPCEP ANTVSERV DEPVSERV ANTVISS DEPVISS
-%left STRING DOUBLE
+%left STRING
 
 %union {
     double doubleValue;
@@ -52,18 +52,22 @@ INFORMACAO:
         strcpy(valorServico, $<stringValue>2);
         free($<stringValue>2);
     }
+    /* Municipio do tomador */
     | ANTCIDTOM STRING DEPCIDTOM {
         strcpy(municipioTomador, $<stringValue>2);
         free($<stringValue>2);
     }
+    /* Municipio do prestador */
     | ANTCIDPREST STRING DEPCIDPREST {
         strcpy(municipioPrestador, $<stringValue>2);
         free($<stringValue>2);
     }
+    /* CEP do tomador em alternativa ao municipio */
     | AREATOM DADO ANTCEP STRING DEPCEP DADO FIMAREATOM {
         strcpy(municipioTomador, $<stringValue>4);
         free($<stringValue>4);
     }
+    /* CEP do prestador em alternativa ao municipio */
     | AREAPREST DADO ANTCEP STRING DEPCEP DADO FIMAREAPREST {
         strcpy(municipioPrestador, $<stringValue>4);
         free($<stringValue>4);
@@ -74,6 +78,7 @@ INFORMACAO:
     ;
 
 DADO:
+    /* Qualquer string não processada */
     STRING {
         free($<stringValue>1);
     }
@@ -83,6 +88,7 @@ DADO:
 
 %%
 
+ /* Não será utilizada a função de erro na versão final */
 void yyerror(char *s) {
     return;
 }
