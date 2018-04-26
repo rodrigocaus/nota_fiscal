@@ -26,7 +26,8 @@ sh test.sh main
 
 ele irá rodar todos os arquivos de `xml_aula` e imprimir na saída padrão.
 
-Com o Makefile, a saída é a mesma que no caso acima:
+Com o Makefile, a saída é a mesma que no caso acima. O processo pode demorar a
+ser finalizado quando se executa o comando pela primeira vez para compilar o código:
 
 ```
 make test
